@@ -1,0 +1,21 @@
+[build-system]
+requires = ["flit_core >=3.2,<4"]
+build-backend = "flit_core.buildapi"
+
+[project]
+name = "bsb-arbor"
+authors = [{name = "Robin De Schepper", email = "robingilbert.deschepper@unipv.it"}]
+readme = "README.md"
+license = {file = "LICENSE"}
+classifiers = ["License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)"]
+dynamic = ["version", "description"]
+dependencies = ["bsb-core==4.0.0a60", "arbor~=0.9", "arborize[arbor]==4.0.0a4"]
+
+[project.entry-points."bsb.simulation_backends"]
+arbor = "bsb_arbor"
+
+[tool.flit.module]
+name = "bsb_arbor"
+
+[project.optional-dependencies]
+test = ["bsb-test==0.0.0a0"]
