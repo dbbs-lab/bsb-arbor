@@ -9,7 +9,7 @@ readme = "README.md"
 license = {file = "LICENSE"}
 classifiers = ["License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)"]
 dynamic = ["version", "description"]
-dependencies = ["bsb-core==4.0.0a60", "arbor~=0.9", "arborize[arbor]==4.0.0a4"]
+dependencies = ["bsb-core>=4.0.0b0,<=4.0.0b9999", "arbor~=0.9", "arborize[arbor]==4.0.0a4"]
 
 [project.entry-points."bsb.simulation_backends"]
 arbor = "bsb_arbor"
