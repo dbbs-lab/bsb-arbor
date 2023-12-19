@@ -9,7 +9,11 @@ readme = "README.md"
 license = {file = "LICENSE"}
 classifiers = ["License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)"]
 dynamic = ["version", "description"]
-dependencies = ["bsb-core>=4.0.0b0,<=4.0.0b9999", "arbor~=0.9", "arborize[arbor]==4.0.0a4"]
+dependencies = [
+    "bsb-core>=4.0.0b0,<=4.0.0b9999",
+    "arbor~=0.9",
+    "arborize[arbor]>=4.0.0b1"
+]
 
 [project.entry-points."bsb.simulation_backends"]
 arbor = "bsb_arbor"
@@ -18,4 +22,4 @@ arbor = "bsb_arbor"
 name = "bsb_arbor"
 
 [project.optional-dependencies]
-test = ["bsb-test==0.0.0a0"]
+test = ["bsb-test>=0.0.0b0"]
