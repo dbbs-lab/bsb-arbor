@@ -1,14 +1,13 @@
 import itertools
-import typing
-
-from bsb.reporting import report, warn
-from bsb.exceptions import AdapterError, UnknownGIDError
-from bsb.services import MPI
-from bsb.simulation.adapter import SimulationData, SimulatorAdapter
 import itertools as it
 import time
-import arbor
+import typing
 
+import arbor
+from bsb.exceptions import AdapterError, UnknownGIDError
+from bsb.reporting import report, warn
+from bsb.services import MPI
+from bsb.simulation.adapter import SimulationData, SimulatorAdapter
 from bsb.storage import Chunk
 
 if typing.TYPE_CHECKING:
@@ -79,7 +78,9 @@ class Population:
         return ranges
 
     def __iter__(self):
-        yield from itertools.chain.from_iterable(range(r[0], r[1]) for r in self._ranges)
+        yield from itertools.chain.from_iterable(
+            range(r[0], r[1]) for r in self._ranges
+        )
 
 
 class GIDManager:
@@ -266,7 +267,12 @@ class ArborAdapter(SimulatorAdapter):
         for device in simulation.devices.values():
             device.prepare_samples(simdata)
 
-    def run(self, simulation):
+    def run(self, *simulations):
+        if len(simulations) != 1:
+            raise RuntimeError(
+                "Can not run multiple simultaneous simulations. Composition not implemented."
+            )
+        simulation = simulations[0]
         try:
             simdata = self.simdata[simulation]
             arbor_sim = simdata.arbor_sim
@@ -285,7 +291,7 @@ class ArborAdapter(SimulatorAdapter):
             if simulation.profiling and arbor.config()["profiling"]:
                 report("printing profiler summary", level=2)
                 report(arbor.profiler_summary(), level=1)
-            return simdata.result
+            return [simdata.result]
         finally:
             del self.simdata[simulation]
 

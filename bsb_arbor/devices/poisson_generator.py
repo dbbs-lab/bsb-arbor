@@ -1,7 +1,8 @@
+import arbor
 from bsb import config
+
 from ..connection import Receiver
 from ..device import ArborDevice
-import arbor
 
 
 @config.node

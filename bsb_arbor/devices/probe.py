@@ -1,6 +1,7 @@
-from ..device import ArborDevice
-from bsb.exceptions import ConfigurationError
 import arbor
+from bsb.exceptions import ConfigurationError
+
+from ..device import ArborDevice
 
 
 class Probe(ArborDevice):

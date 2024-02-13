@@ -2,6 +2,7 @@ import psutil
 from bsb import config
 from bsb.config import types
 from bsb.simulation.simulation import Simulation
+
 from .cell import ArborCell
 from .connection import ArborConnection
 from .device import ArborDevice

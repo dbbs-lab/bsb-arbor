@@ -1,11 +1,11 @@
 import abc
 import typing
 
+import arbor
 from bsb import config
 from bsb.config import types
 from bsb.exceptions import ConfigurationError
 from bsb.simulation.cell import CellModel
-import arbor
 
 from .adapter import SingleReceiverCollection
 

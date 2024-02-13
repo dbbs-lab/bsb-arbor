@@ -1,7 +1,7 @@
 import neo
-
 from bsb import config
 from bsb.services import MPI
+
 from ..device import ArborDevice
 
 
