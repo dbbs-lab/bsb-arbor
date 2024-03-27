@@ -2,7 +2,7 @@
 Arbor simulation adapter for the BSB framework
 """
 
-from bsb.simulation import SimulationBackendPlugin
+from bsb import SimulationBackendPlugin
 
 from . import devices
 from .adapter import ArborAdapter

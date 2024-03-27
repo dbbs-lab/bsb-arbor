@@ -23,3 +23,6 @@ name = "bsb_arbor"
 
 [project.optional-dependencies]
 test = ["bsb-core[parallel]", "bsb-test>=0.0.0b0", "coverage~=7.0"]
+
+[tool.isort]
+profile = "black"

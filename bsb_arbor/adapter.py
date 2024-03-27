@@ -4,11 +4,16 @@ import time
 import typing
 
 import arbor
-from bsb.exceptions import AdapterError, UnknownGIDError
-from bsb.reporting import report, warn
-from bsb.services import MPI
-from bsb.simulation.adapter import SimulationData, SimulatorAdapter
-from bsb.storage import Chunk
+from bsb import (
+    MPI,
+    AdapterError,
+    Chunk,
+    SimulationData,
+    SimulatorAdapter,
+    UnknownGIDError,
+    report,
+    warn,
+)
 
 if typing.TYPE_CHECKING:
     from .simulation import ArborSimulation

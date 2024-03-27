@@ -1,7 +1,6 @@
 import arbor
 import tqdm
-from bsb import config
-from bsb.simulation.connection import ConnectionModel
+from bsb import ConnectionModel, config
 
 
 class Receiver:

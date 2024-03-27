@@ -2,15 +2,12 @@ import abc
 import typing
 
 import arbor
-from bsb import config
-from bsb.config import types
-from bsb.exceptions import ConfigurationError
-from bsb.simulation.cell import CellModel
+from bsb import CellModel, ConfigurationError, config, types
 
 from .adapter import SingleReceiverCollection
 
 if typing.TYPE_CHECKING:
-    from bsb.storage.interfaces import PlacementSet
+    from bsb import PlacementSet
 
 
 @config.dynamic(

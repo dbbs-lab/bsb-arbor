@@ -1,7 +1,5 @@
 import psutil
-from bsb import config
-from bsb.config import types
-from bsb.simulation.simulation import Simulation
+from bsb import Simulation, config, types
 
 from .cell import ArborCell
 from .connection import ArborConnection

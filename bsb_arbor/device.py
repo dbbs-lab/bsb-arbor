@@ -1,10 +1,7 @@
 import abc
 
 import arbor
-from bsb import config
-from bsb.config import types
-from bsb.simulation.device import DeviceModel
-from bsb.simulation.targetting import Targetting
+from bsb import DeviceModel, Targetting, config, types
 
 
 @config.dynamic(attr_name="device", auto_classmap=True, classmap_entry=None)
