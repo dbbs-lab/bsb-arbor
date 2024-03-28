@@ -29,7 +29,7 @@ test = ["bsb-core[parallel]", "bsb-nest>=0.0.0b0", "bsb-test>=0.0.0b0", "coverag
 profile = "black"
 
 [tool.bumpversion]
-current_version = "0.0.0-b2"
+current_version = "0.0.0-b3"
 parse = """(?x)
     (?P<major>0|[1-9]\\d*)\\.
     (?P<minor>0|[1-9]\\d*)\\.
