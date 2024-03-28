@@ -10,6 +10,7 @@ license = {file = "LICENSE"}
 classifiers = ["License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)"]
 dynamic = ["version", "description"]
 dependencies = [
+    "numpy",
     "bsb-core>=4.0.0b0,<=4.0.0b9999",
     "arbor~=0.9",
     "arborize[arbor]>=4.0.0b1"
@@ -22,7 +23,7 @@ arbor = "bsb_arbor"
 name = "bsb_arbor"
 
 [project.optional-dependencies]
-test = ["bsb-core[parallel]", "bsb-test>=0.0.0b0", "coverage~=7.0"]
+test = ["bsb-core[parallel]", "bsb-nest>=0.0.0b0", "bsb-test>=0.0.0b0", "coverage~=7.0"]
 
 [tool.isort]
 profile = "black"
