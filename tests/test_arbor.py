@@ -1,15 +1,13 @@
 import unittest
 
-from bsb.config import from_file
-from bsb.core import Scaffold
-from bsb.services import MPI
-from bsb_test import RandomStorageFixture, get_config_path
+from bsb import Scaffold, parse_configuration_file, MPI
+from bsb_test import RandomStorageFixture, get_test_config
 
 
 @unittest.skipIf(MPI.get_size() > 1, "Skipped during parallel testing.")
 class TestArbor(RandomStorageFixture, unittest.TestCase, engine_name="hdf5"):
     def test_brunel(self):
-        cfg = from_file(get_config_path("test_brunel_wbsb.json"))
+        cfg = get_test_config("brunel_wbsb")
         simcfg = cfg.simulations.test_arbor
 
         network = Scaffold(cfg, self.storage)
