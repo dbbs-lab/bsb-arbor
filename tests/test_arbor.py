@@ -1,6 +1,6 @@
 import unittest
 
-from bsb import Scaffold, parse_configuration_file, MPI
+from bsb import MPI, Scaffold, parse_configuration_file
 from bsb_test import RandomStorageFixture, get_test_config
 
 

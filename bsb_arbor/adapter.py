@@ -2,9 +2,9 @@ import itertools
 import itertools as it
 import time
 import typing
-import numpy as np
 
 import arbor
+import numpy as np
 from bsb import (
     MPI,
     AdapterError,
