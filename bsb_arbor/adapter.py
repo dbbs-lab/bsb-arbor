@@ -2,6 +2,7 @@ import itertools
 import itertools as it
 import time
 import typing
+import numpy as np
 
 import arbor
 from bsb import (
@@ -56,6 +57,7 @@ class SingleReceiverCollection(list):
 class Population:
     def __init__(self, simdata, cell_model, offset):
         self._model = cell_model
+        self._simdata = simdata
         ps = cell_model.get_placement_set(simdata.chunks)
         self._ranges = self._get_ranges(simdata.chunks, ps, offset)
         self._offset = offset
@@ -68,8 +70,31 @@ class Population:
     def offset(self):
         return self._offset
 
+    def __len__(self):
+        return sum(stop - start for start, stop in self._ranges)
+
     def __contains__(self, i):
         return any(start <= i < stop for start, stop in self._ranges)
+
+    def copy(self):
+        return Population(self._simdata, self._model, self._offset)
+
+    def __getitem__(self, item):
+        # Boolean masking, kind of
+        if getattr(item, "dtype", None) == bool or _all_bools(item):
+            if len(item) != len(self):
+                raise ValueError(
+                    f"Dimension mismatch between population ({len(self)}) and mask ({len(item)})"
+                )
+            return self._subpop_np(np.array(self)[item])
+        elif getattr(item, "dtype", None) == int or _all_ints(item):
+            if getattr(item, "ndim", None) == 0:
+                return self._subpop_one(item)
+            return self._subpop_np(np.array(self)[item])
+        elif isinstance(item, slice):
+            return self._subpop_np(np.array(self)[item])
+        else:
+            return self._subpop_one(item)
 
     def _get_ranges(self, chunks, ps, offset):
         stats = ps.get_chunk_stats()
@@ -81,6 +106,39 @@ class Population:
                 ranges.append((offset, offset + len_))
             offset += len_
         return ranges
+
+    def _subpop_np(self, arr):
+        pop = self.copy()
+        if not len(pop):
+            return pop
+        ranges = []
+        prev = None
+        start, stop = self._ranges[0]
+        for i in arr:
+            if prev is None:
+                start += i
+                stop = start + 1
+            elif i == prev + 1:
+                stop += 1
+            else:
+                ranges.append((start, stop))
+                start = i
+                stop = i + 1
+            prev = i
+        pop._ranges = ranges
+        return pop
+
+    def _subpop_one(self, item):
+        if item >= len(self):
+            raise IndexError(f"Index {item} out of bounds for size {len(self)}")
+        pop = self.copy()
+        ptr = 0
+        for start, stop in self._ranges:
+            if item < (ptr + stop - start):
+                pop._ranges = [(start + ptr - item, start + ptr - item + 1)]
+                return pop
+            else:
+                ptr += stop - start
 
     def __iter__(self):
         yield from itertools.chain.from_iterable(
@@ -367,3 +425,19 @@ class ArborAdapter(SimulatorAdapter):
             for chunk in chunks:
                 simdata.chunk_node_map[chunk] = node
         simdata.chunks = simdata.node_chunk_alloc[MPI.get_rank()]
+
+
+def _all_bools(arr):
+    try:
+        return all(isinstance(b, bool) for b in arr)
+    except TypeError:
+        # Not iterable
+        return False
+
+
+def _all_ints(arr):
+    try:
+        return all(isinstance(b, int) for b in arr)
+    except TypeError:
+        # Not iterable
+        return False
