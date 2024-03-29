@@ -10,10 +10,10 @@ license = {file = "LICENSE"}
 classifiers = ["License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)"]
 dynamic = ["version", "description"]
 dependencies = [
-    "numpy",
-    "bsb-core==4.0.0rc2",
+    "numpy~=1.21",
+    "bsb-core~=4.0",
     "arbor~=0.9",
-    "arborize[arbor]==4.0.0b6"
+    "arborize[arbor]~=4.0"
 ]
 
 [project.entry-points."bsb.simulation_backends"]
@@ -25,8 +25,8 @@ name = "bsb_arbor"
 [project.optional-dependencies]
 test = [
     "bsb-core[parallel]",
-    "bsb-nest==4.0.0rc2",
-    "bsb-test==4.0.0rc2",
+    "bsb-nest~=4.0",
+    "bsb-test~=4.0",
     "coverage~=7.0"
 ]
 
@@ -34,7 +34,7 @@ test = [
 profile = "black"
 
 [tool.bumpversion]
-current_version = "4.0.0-rc2"
+current_version = "4.0.0"
 parse = """(?x)
     (?P<major>0|[1-9]\\d*)\\.
     (?P<minor>0|[1-9]\\d*)\\.

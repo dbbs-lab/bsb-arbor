@@ -8,5 +8,5 @@ from . import devices
 from .adapter import ArborAdapter
 from .simulation import ArborSimulation
 
-__version__ = "4.0.0-rc2"
+__version__ = "4.0.0"
 __plugin__ = SimulationBackendPlugin(Simulation=ArborSimulation, Adapter=ArborAdapter)
