@@ -33,6 +33,6 @@ jobs:
           pip install -e .[test]
       - name: Run tests & coverage
         run: |
-          coverage run -p -m unittest
-          mpiexec -n 2 coverage run -p -m unittest
+          coverage run -p -m unittest discover -v -s ./tests
+          mpiexec -n 2 coverage run -p -m unittest -v -s ./tests
           bash <(curl -s https://codecov.io/bash)
