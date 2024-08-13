@@ -5,6 +5,7 @@ import typing
 
 import arbor
 import numpy as np
+from arbor import units as U
 from bsb import (
     MPI,
     AdapterError,
@@ -194,14 +195,27 @@ class ArborRecipe(arbor.recipe):
         self._simulation = simulation
         self._simdata = simdata
         self._global_properties = arbor.neuron_cable_properties()
-        self._global_properties.set_property(Vm=-65, tempK=300, rL=35.4, cm=0.01)
-        self._global_properties.set_ion(ion="na", int_con=10, ext_con=140, rev_pot=50)
-        self._global_properties.set_ion(ion="k", int_con=54.4, ext_con=2.5, rev_pot=-77)
-        self._global_properties.set_ion(
-            ion="ca", int_con=0.0001, ext_con=2, rev_pot=132.5
+        self._global_properties.set_property(
+            Vm=-65 * U.mV,
+            tempK=300 * U.Kelvin,
+            rL=35.4 * U.Ohm * U.cm,
+            cm=0.01 * U.F / U.m2,
         )
         self._global_properties.set_ion(
-            ion="h", valence=1, int_con=1.0, ext_con=1.0, rev_pot=-34
+            ion="na", int_con=10 * U.mM, ext_con=140 * U.mM, rev_pot=50 * U.mM
+        )
+        self._global_properties.set_ion(
+            ion="k", int_con=54.4 * U.mM, ext_con=2.5 * U.mM, rev_pot=-77 * U.mM
+        )
+        self._global_properties.set_ion(
+            ion="ca", int_con=0.0001 * U.mM, ext_con=2 * U.mM, rev_pot=132.5 * U.mM
+        )
+        self._global_properties.set_ion(
+            ion="h",
+            valence=1,
+            int_con=1.0 * U.mM,
+            ext_con=1.0 * U.mM,
+            rev_pot=-34 * U.mM,
         )
         self._global_properties.catalogue = self._get_catalogue()
 
@@ -234,7 +248,7 @@ class ArborRecipe(arbor.recipe):
 
     def connections_on(self, gid):
         return [
-            arbor.connection(rcv.from_(), rcv.on(), rcv.weight, rcv.delay)
+            arbor.connection(rcv.from_(), rcv.on(), rcv.weight, rcv.delay * U.ms)
             for rcv in self._simdata.connections_on[gid]
         ]
 
@@ -349,7 +363,7 @@ class ArborAdapter(SimulatorAdapter):
 
             start = time.time()
             report("running simulation", level=1)
-            arbor_sim.run(simulation.duration, dt=simulation.resolution)
+            arbor_sim.run(simulation.duration * U.ms, dt=simulation.resolution * U.ms)
             report(f"completed simulation. {time.time() - start:.2f}s", level=1)
             if simulation.profiling and arbor.config()["profiling"]:
                 report("printing profiler summary", level=2)
