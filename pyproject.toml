@@ -12,7 +12,7 @@ dynamic = ["version", "description"]
 dependencies = [
     "numpy~=1.21",
     "bsb-core~=4.0",
-    "arbor~=0.9",
+    "arbor~=0.10",
     "arborize[arbor]~=4.0"
 ]
 
@@ -23,11 +23,22 @@ arbor = "bsb_arbor"
 name = "bsb_arbor"
 
 [project.optional-dependencies]
+parallel = ["bsb-core[parallel]"]
 test = [
     "bsb-core[parallel]",
-    "bsb-nest~=4.0",
+    "bsb-hdf5~=4.0",
     "bsb-test~=4.0",
     "coverage~=7.0"
+]
+dev = [
+    "bsb-arbor[test]",
+    "build~=1.0",
+    "twine~=4.0",
+    "pre-commit~=3.5",
+    "black~=24.1.1",
+    "isort~=5.12",
+    "snakeviz~=2.1",
+    "bump-my-version~=0.24"
 ]
 
 [tool.isort]

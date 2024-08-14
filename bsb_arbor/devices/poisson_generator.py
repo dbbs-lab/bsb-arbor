@@ -1,4 +1,5 @@
 import arbor
+from arbor import units as U
 from bsb import config
 
 from ..connection import Receiver
@@ -18,6 +19,8 @@ class PoissonGenerator(ArborDevice, classmap_entry="poisson_generator"):
     def implement_generators(self, simdata, gid):
         target = Receiver(self, None, [-1, -1], [-1, -1], 0).on()
         gen = arbor.event_generator(
-            target, self.weight, arbor.poisson_schedule(0, self.rate / 1000, gid)
+            target,
+            self.weight,
+            arbor.poisson_schedule(tstart=0 * U.ms, freq=self.rate * U.Hz, seed=gid),
         )
         return [gen]

@@ -69,7 +69,7 @@ class LIFCell(ArborCell, classmap_entry="lif"):
         cell = arbor.lif_cell(f"-1_-1", f"-1_-1_0")
         try:
             for k, v in self.constants.items():
-                setattr(cell, k, v)
+                setattr(cell, k, v * getattr(cell, k).units)
         except AttributeError:
             node_name = type(self).constants.get_node_name(self)
             raise ConfigurationError(
