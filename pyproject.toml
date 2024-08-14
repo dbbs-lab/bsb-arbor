@@ -27,7 +27,6 @@ parallel = ["bsb-core[parallel]"]
 test = [
     "bsb-core[parallel]",
     "bsb-hdf5~=4.0",
-    "bsb-nest~=4.1",
     "bsb-test~=4.2",
     "coverage~=7.0"
 ]

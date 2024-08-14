@@ -1,13 +1,17 @@
 import unittest
 
-from bsb import MPI, Scaffold, parse_configuration_file
-from bsb_test import RandomStorageFixture, get_test_config
+from bsb import MPI, Configuration, Scaffold
+from bsb_test import RandomStorageFixture, get_test_config_tree
 
 
 @unittest.skipIf(MPI.get_size() > 1, "Skipped during parallel testing.")
 class TestArbor(RandomStorageFixture, unittest.TestCase, engine_name="hdf5"):
     def test_brunel(self):
-        cfg = get_test_config("brunel_wbsb")
+        cfg = get_test_config_tree("brunel_wbsb")
+        # Remove unused nest simulation
+        # This way we do not have to install nest
+        del cfg["simulations"]["test_nest"]
+        cfg = Configuration(cfg)
         simcfg = cfg.simulations.test_arbor
 
         network = Scaffold(cfg, self.storage)
