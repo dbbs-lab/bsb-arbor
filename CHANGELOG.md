@@ -1,3 +1,8 @@
+## [v4.1.1] - 2025-01-07
+### :bug: Bug Fixes
+- [`f7de054`](https://github.com/dbbs-lab/bsb-arbor/commit/f7de054c985ea1f41f81117e9951f35c558c700a) - BSB version dependencies *(PR [#5](https://github.com/dbbs-lab/bsb-arbor/pull/5) by [@drodarie](https://github.com/drodarie))*
+
+
 ## [v4.1.0] - 2024-08-28
 ### :sparkles: New Features
 - [`290b136`](https://github.com/dbbs-lab/bsb-arbor/commit/290b136d47443b1357891463b5331f7f6dd38dfb) - add auto release pipeline *(PR [#4](https://github.com/dbbs-lab/bsb-arbor/pull/4) by [@drodarie](https://github.com/drodarie))*
@@ -17,3 +22,4 @@
 **Full Changelog**: https://github.com/dbbs-lab/bsb-arbor/commits/v4.0.0
 
 [v4.1.0]: https://github.com/dbbs-lab/bsb-arbor/compare/v4.0.0...v4.1.0
+[v4.1.1]: https://github.com/dbbs-lab/bsb-arbor/compare/v4.1.0...v4.1.1
