@@ -15,4 +15,5 @@
 * @Helveg made their first contribution in https://github.com/dbbs-lab/bsb-arbor/pull/1
 
 **Full Changelog**: https://github.com/dbbs-lab/bsb-arbor/commits/v4.0.0
+
 [v4.1.0]: https://github.com/dbbs-lab/bsb-arbor/compare/v4.0.0...v4.1.0

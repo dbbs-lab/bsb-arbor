@@ -11,7 +11,7 @@ classifiers = ["License :: OSI Approved :: GNU General Public License v3 or late
 dynamic = ["version", "description"]
 dependencies = [
     "numpy~=1.21",
-    "bsb-core~=4.0",
+    "bsb-core~=5.0",
     "arbor~=0.10",
     "arborize[arbor]~=4.0"
 ]
@@ -26,7 +26,7 @@ name = "bsb_arbor"
 parallel = ["bsb-core[parallel]"]
 test = [
     "bsb-core[parallel]",
-    "bsb-hdf5~=4.0",
+    "bsb-hdf5~=5.0",
     "bsb-test~=4.0",
     "coverage~=7.0"
 ]
