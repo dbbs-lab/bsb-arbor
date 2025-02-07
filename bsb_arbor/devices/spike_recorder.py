@@ -25,7 +25,7 @@ class SpikeRecorder(ArborDevice, classmap_entry="spike_recorder"):
                     neo.SpikeTrain(
                         spiketrain,
                         units="ms",
-                        senders=senders,
+                        array_annotations={"senders": senders},
                         t_stop=self.simulation.duration,
                         device=self.name,
                         gids=list(self._gids),
