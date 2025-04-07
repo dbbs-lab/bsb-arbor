@@ -297,7 +297,7 @@ class ArborAdapter(SimulatorAdapter):
                 else:
                     context = arbor.context(
                         arbor.proc_allocation(threads=simulation.threads),
-                        mpi=comm or comm.get_communicator(),
+                        mpi=comm.get_communicator(),
                     )
             if simulation.profiling:
                 if arbor.config()["profiling"]:
@@ -317,7 +317,7 @@ class ArborAdapter(SimulatorAdapter):
             self.domain = arbor.partition_load_balance(recipe, context)
             self.gids = set(it.chain.from_iterable(g.gids for g in self.domain.groups))
             simdata.arbor_sim = arbor.simulation(recipe, context, self.domain)
-            self.prepare_samples(simulation, simdata)
+            self.prepare_samples(simulation, simdata, comm)
             report("prepared simulation", level=1)
             return simdata
         except Exception:
@@ -327,9 +327,9 @@ class ArborAdapter(SimulatorAdapter):
     def get_gid_manager(self, simulation, simdata):
         return GIDManager(simulation, simdata)
 
-    def prepare_samples(self, simulation, simdata):
+    def prepare_samples(self, simulation, simdata, comm):
         for device in simulation.devices.values():
-            device.prepare_samples(simdata)
+            device.prepare_samples(simdata, comm)
 
     def run(self, *simulations, comm=None):
         if len(simulations) != 1:
