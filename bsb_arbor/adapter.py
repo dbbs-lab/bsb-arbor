@@ -7,7 +7,6 @@ import arbor
 import numpy as np
 from arbor import units as U
 from bsb import (
-    MPI,
     AdapterError,
     Chunk,
     SimulationData,
@@ -285,23 +284,11 @@ class ArborAdapter(SimulatorAdapter):
         super().__init__()
         self.simdata: typing.Dict["ArborSimulation", "SimulationData"] = {}
 
-    def get_rank(self):
-        return MPI.get_rank()
-
-    def get_size(self):
-        return MPI.get_size()
-
-    def broadcast(self, data, root=0):
-        return MPI.bcast(data, root)
-
-    def barrier(self):
-        return MPI.barrier()
-
     def prepare(self, simulation: "ArborSimulation", comm=None):
-        simdata = self._create_simdata(simulation)
+        simdata = self._create_simdata(simulation, comm)
         try:
             context = arbor.context(arbor.proc_allocation(threads=simulation.threads))
-            if MPI.get_size() > 1:
+            if comm.get_size() > 1:
                 if not arbor.config()["mpi4py"]:
                     warn(
                         f"Arbor does not seem to be built with MPI support, running"
@@ -310,7 +297,7 @@ class ArborAdapter(SimulatorAdapter):
                 else:
                     context = arbor.context(
                         arbor.proc_allocation(threads=simulation.threads),
-                        mpi=comm or MPI.get_communicator(),
+                        mpi=comm or comm.get_communicator(),
                     )
             if simulation.profiling:
                 if arbor.config()["profiling"]:
@@ -325,7 +312,7 @@ class ArborAdapter(SimulatorAdapter):
             report("preparing simulation", level=1)
             report("MPI processes:", context.ranks, level=2)
             report("Threads per process:", context.threads, level=2)
-            recipe = self.get_recipe(simulation, simdata)
+            recipe = self.get_recipe(simulation, comm, simdata)
             # Gap junctions are required for domain decomposition
             self.domain = arbor.partition_load_balance(recipe, context)
             self.gids = set(it.chain.from_iterable(g.gids for g in self.domain.groups))
@@ -344,7 +331,7 @@ class ArborAdapter(SimulatorAdapter):
         for device in simulation.devices.values():
             device.prepare_samples(simdata)
 
-    def run(self, *simulations):
+    def run(self, *simulations, comm=None):
         if len(simulations) != 1:
             raise RuntimeError(
                 "Can not run multiple simultaneous simulations. Composition not implemented."
@@ -358,7 +345,7 @@ class ArborAdapter(SimulatorAdapter):
                 f"Can't run unprepared simulation '{simulation.name}'"
             ) from None
         try:
-            if not MPI.get_rank():
+            if not comm.get_rank():
                 arbor_sim.record(arbor.spike_recording.all)
 
             start = time.time()
@@ -372,17 +359,17 @@ class ArborAdapter(SimulatorAdapter):
         finally:
             del self.simdata[simulation]
 
-    def get_recipe(self, simulation, simdata=None):
+    def get_recipe(self, simulation, comm, simdata=None):
         if simdata is None:
-            simdata = self._create_simdata(simulation)
+            simdata = self._create_simdata(simulation, comm)
         self._cache_gap_junctions(simulation, simdata)
         self._cache_connections(simulation, simdata)
         self._cache_devices(simulation, simdata)
         return ArborRecipe(simulation, simdata)
 
-    def _create_simdata(self, simulation):
+    def _create_simdata(self, simulation, comm):
         self.simdata[simulation] = simdata = SimulationData(simulation)
-        self._assign_chunks(simulation, simdata)
+        self._assign_chunks(simulation, simdata, comm)
         return simdata
 
     def _cache_gap_junctions(self, simulation, simdata):
@@ -429,16 +416,16 @@ class ArborAdapter(SimulatorAdapter):
             for target in itertools.chain.from_iterable(targets.values()):
                 simdata.devices_on[target].append(device)
 
-    def _assign_chunks(self, simulation, simdata):
+    def _assign_chunks(self, simulation, simdata, comm):
         chunk_stats = simulation.scaffold.storage.get_chunk_stats()
-        size = MPI.get_size()
+        size = comm.get_size()
         all_chunks = [Chunk.from_id(int(chunk), None) for chunk in chunk_stats.keys()]
         simdata.node_chunk_alloc = [all_chunks[rank::size] for rank in range(0, size)]
         simdata.chunk_node_map = {}
         for node, chunks in enumerate(simdata.node_chunk_alloc):
             for chunk in chunks:
                 simdata.chunk_node_map[chunk] = node
-        simdata.chunks = simdata.node_chunk_alloc[MPI.get_rank()]
+        simdata.chunks = simdata.node_chunk_alloc[comm.get_rank()]
 
 
 def _all_bools(arr):
