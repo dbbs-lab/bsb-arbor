@@ -280,15 +280,15 @@ class ArborRecipe(arbor.recipe):
 
 
 class ArborAdapter(SimulatorAdapter):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, comm=None):
+        super().__init__(comm)
         self.simdata: typing.Dict["ArborSimulation", "SimulationData"] = {}
 
-    def prepare(self, simulation: "ArborSimulation", comm=None):
-        simdata = self._create_simdata(simulation, comm)
+    def prepare(self, simulation: "ArborSimulation"):
+        simdata = self._create_simdata(simulation)
         try:
             context = arbor.context(arbor.proc_allocation(threads=simulation.threads))
-            if comm.get_size() > 1:
+            if self.comm.get_size() > 1:
                 if not arbor.config()["mpi4py"]:
                     warn(
                         f"Arbor does not seem to be built with MPI support, running"
@@ -297,7 +297,7 @@ class ArborAdapter(SimulatorAdapter):
                 else:
                     context = arbor.context(
                         arbor.proc_allocation(threads=simulation.threads),
-                        mpi=comm.get_communicator(),
+                        mpi=self.comm.get_communicator(),
                     )
             if simulation.profiling:
                 if arbor.config()["profiling"]:
@@ -312,12 +312,12 @@ class ArborAdapter(SimulatorAdapter):
             report("preparing simulation", level=1)
             report("MPI processes:", context.ranks, level=2)
             report("Threads per process:", context.threads, level=2)
-            recipe = self.get_recipe(simulation, comm, simdata)
+            recipe = self.get_recipe(simulation, simdata)
             # Gap junctions are required for domain decomposition
             self.domain = arbor.partition_load_balance(recipe, context)
             self.gids = set(it.chain.from_iterable(g.gids for g in self.domain.groups))
             simdata.arbor_sim = arbor.simulation(recipe, context, self.domain)
-            self.prepare_samples(simulation, simdata, comm)
+            self.prepare_samples(simulation, simdata)
             report("prepared simulation", level=1)
             return simdata
         except Exception:
@@ -327,11 +327,11 @@ class ArborAdapter(SimulatorAdapter):
     def get_gid_manager(self, simulation, simdata):
         return GIDManager(simulation, simdata)
 
-    def prepare_samples(self, simulation, simdata, comm):
+    def prepare_samples(self, simulation, simdata):
         for device in simulation.devices.values():
-            device.prepare_samples(simdata, comm)
+            device.prepare_samples(simdata, comm=self.comm)
 
-    def run(self, *simulations, comm=None):
+    def run(self, *simulations):
         if len(simulations) != 1:
             raise RuntimeError(
                 "Can not run multiple simultaneous simulations. Composition not implemented."
@@ -345,7 +345,7 @@ class ArborAdapter(SimulatorAdapter):
                 f"Can't run unprepared simulation '{simulation.name}'"
             ) from None
         try:
-            if not comm.get_rank():
+            if not self.comm.get_rank():
                 arbor_sim.record(arbor.spike_recording.all)
 
             start = time.time()
@@ -359,17 +359,17 @@ class ArborAdapter(SimulatorAdapter):
         finally:
             del self.simdata[simulation]
 
-    def get_recipe(self, simulation, comm, simdata=None):
+    def get_recipe(self, simulation, simdata=None):
         if simdata is None:
-            simdata = self._create_simdata(simulation, comm)
+            simdata = self._create_simdata(simulation)
         self._cache_gap_junctions(simulation, simdata)
         self._cache_connections(simulation, simdata)
         self._cache_devices(simulation, simdata)
         return ArborRecipe(simulation, simdata)
 
-    def _create_simdata(self, simulation, comm):
+    def _create_simdata(self, simulation):
         self.simdata[simulation] = simdata = SimulationData(simulation)
-        self._assign_chunks(simulation, simdata, comm)
+        self._assign_chunks(simulation, simdata)
         return simdata
 
     def _cache_gap_junctions(self, simulation, simdata):
@@ -416,16 +416,16 @@ class ArborAdapter(SimulatorAdapter):
             for target in itertools.chain.from_iterable(targets.values()):
                 simdata.devices_on[target].append(device)
 
-    def _assign_chunks(self, simulation, simdata, comm):
+    def _assign_chunks(self, simulation, simdata):
         chunk_stats = simulation.scaffold.storage.get_chunk_stats()
-        size = comm.get_size()
+        size = self.comm.get_size()
         all_chunks = [Chunk.from_id(int(chunk), None) for chunk in chunk_stats.keys()]
         simdata.node_chunk_alloc = [all_chunks[rank::size] for rank in range(0, size)]
         simdata.chunk_node_map = {}
         for node, chunks in enumerate(simdata.node_chunk_alloc):
             for chunk in chunks:
                 simdata.chunk_node_map[chunk] = node
-        simdata.chunks = simdata.node_chunk_alloc[comm.get_rank()]
+        simdata.chunks = simdata.node_chunk_alloc[self.comm.get_rank()]
 
 
 def _all_bools(arr):
