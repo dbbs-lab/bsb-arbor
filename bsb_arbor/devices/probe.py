@@ -22,8 +22,8 @@ class Probe(ArborDevice):
         kwargs = dict((k, getattr(self, k)) for k in probe_args if hasattr(self, k))
         return [getattr(arbor, self.get_probe_name())(**kwargs)]
 
-    def prepare_samples(self, sim):
-        super().prepare_samples(sim)
+    def prepare_samples(self, sim, comm):
+        super().prepare_samples(sim, comm)
         for probe_id, handle in zip(self._probe_ids, self._handles):
             self.adapter.result.add(ProbeRecorder(self, sim, probe_id, handle))
 
