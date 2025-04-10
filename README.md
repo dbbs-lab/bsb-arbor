@@ -3,7 +3,7 @@
 
 # bsb-arbor
 
-bsb-nest is a plugin of the [BSB](https://github.com/dbbs-lab/bsb) (see also 
+bsb-arbor is a plugin of the [BSB](https://github.com/dbbs-lab/bsb) (see also 
 [bsb-core](https://github.com/dbbs-lab/bsb-core)). 
 It contains the interfaces and tools to simulate BSB circuit with the 
 [Arbor simulator](https://arbor-sim.org/).

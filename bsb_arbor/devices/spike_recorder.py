@@ -1,6 +1,5 @@
 import neo
 from bsb import config
-from bsb.services import MPI
 
 from ..device import ArborDevice
 
@@ -10,9 +9,9 @@ class SpikeRecorder(ArborDevice, classmap_entry="spike_recorder"):
     def boot(self):
         self._gids = set()
 
-    def prepare_samples(self, simdata):
-        super().prepare_samples(simdata)
-        if not MPI.get_rank():
+    def prepare_samples(self, simdata, comm):
+        super().prepare_samples(simdata, comm)
+        if not comm.get_rank():
 
             def record_device_spikes(segment):
                 spiketrain = list()
@@ -25,7 +24,7 @@ class SpikeRecorder(ArborDevice, classmap_entry="spike_recorder"):
                     neo.SpikeTrain(
                         spiketrain,
                         units="ms",
-                        senders=senders,
+                        array_annotations={"senders": senders},
                         t_stop=self.simulation.duration,
                         device=self.name,
                         gids=list(self._gids),

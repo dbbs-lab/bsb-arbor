@@ -7,7 +7,6 @@ import arbor
 import numpy as np
 from arbor import units as U
 from bsb import (
-    MPI,
     AdapterError,
     Chunk,
     SimulationData,
@@ -281,27 +280,15 @@ class ArborRecipe(arbor.recipe):
 
 
 class ArborAdapter(SimulatorAdapter):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, comm=None):
+        super().__init__(comm)
         self.simdata: typing.Dict["ArborSimulation", "SimulationData"] = {}
 
-    def get_rank(self):
-        return MPI.get_rank()
-
-    def get_size(self):
-        return MPI.get_size()
-
-    def broadcast(self, data, root=0):
-        return MPI.bcast(data, root)
-
-    def barrier(self):
-        return MPI.barrier()
-
-    def prepare(self, simulation: "ArborSimulation", comm=None):
+    def prepare(self, simulation: "ArborSimulation"):
         simdata = self._create_simdata(simulation)
         try:
             context = arbor.context(arbor.proc_allocation(threads=simulation.threads))
-            if MPI.get_size() > 1:
+            if self.comm.get_size() > 1:
                 if not arbor.config()["mpi4py"]:
                     warn(
                         f"Arbor does not seem to be built with MPI support, running"
@@ -310,7 +297,7 @@ class ArborAdapter(SimulatorAdapter):
                 else:
                     context = arbor.context(
                         arbor.proc_allocation(threads=simulation.threads),
-                        mpi=comm or MPI.get_communicator(),
+                        mpi=self.comm.get_communicator(),
                     )
             if simulation.profiling:
                 if arbor.config()["profiling"]:
@@ -342,7 +329,7 @@ class ArborAdapter(SimulatorAdapter):
 
     def prepare_samples(self, simulation, simdata):
         for device in simulation.devices.values():
-            device.prepare_samples(simdata)
+            device.prepare_samples(simdata, comm=self.comm)
 
     def run(self, *simulations):
         if len(simulations) != 1:
@@ -358,7 +345,7 @@ class ArborAdapter(SimulatorAdapter):
                 f"Can't run unprepared simulation '{simulation.name}'"
             ) from None
         try:
-            if not MPI.get_rank():
+            if not self.comm.get_rank():
                 arbor_sim.record(arbor.spike_recording.all)
 
             start = time.time()
@@ -431,14 +418,14 @@ class ArborAdapter(SimulatorAdapter):
 
     def _assign_chunks(self, simulation, simdata):
         chunk_stats = simulation.scaffold.storage.get_chunk_stats()
-        size = MPI.get_size()
+        size = self.comm.get_size()
         all_chunks = [Chunk.from_id(int(chunk), None) for chunk in chunk_stats.keys()]
         simdata.node_chunk_alloc = [all_chunks[rank::size] for rank in range(0, size)]
         simdata.chunk_node_map = {}
         for node, chunks in enumerate(simdata.node_chunk_alloc):
             for chunk in chunks:
                 simdata.chunk_node_map[chunk] = node
-        simdata.chunks = simdata.node_chunk_alloc[MPI.get_rank()]
+        simdata.chunks = simdata.node_chunk_alloc[self.comm.get_rank()]
 
 
 def _all_bools(arr):
